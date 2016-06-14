@@ -1,0 +1,94 @@
+Name: Tomcat Application Server for Chef Server (RightLink 10)
+Description: "Tomcat Application Server for Chef Server (RightLink 10) ServerTemplate.
+  \  RightLink10 is a new agent to connect servers to the RightScale platform that
+  is very lightweight and simple to install.\r\n_It is not a plug-in upgrade from
+  the older RightLink v6 series._\r\nSee [http://docs.rightscale.com/rl/about.html](http://docs.rightscale.com/rl/about.html)
+  for details.\r\n\r\nIn addition to installing Tomcat, this ServerTemplate runs a
+  script to update the packaging system and enable automatic security updates, and
+  a collectd install script to enable RightScale monitoring. \r\n\r\nThe ServerTemplate
+  can run on most any Linux distro that supports cloud-init. It is recommended to
+  use the standard distro images in various clouds.\r\n\r\n__ Requirements__\r\n\r\n
+  * Chef Server or Hosted Chef\r\n * [rsc_tomcat](https://github.com/rightscale-services-cookbooks/rsc_tomcat)
+  ([1.2.0](https://github.com/rightscale-services-cookbooks/rsc_tomcat/releases/tag/v1.2.0))\r\n
+  * [rsc_remote_receipt](https://github.com/rightscale-services-cookbooks/rsc_remote_receipe)
+  ([10.0.0](https://github.com/rightscale-services-cookbooks/rsc_remote_recipe/releases/tag/v10.0.0))\r\n\r\n__Key
+  Features:__\r\n\r\n* Sets up and launches a Tomcat application server in any of
+  the supported cloud infrastructures.\r\n* Connections to a MySQL database.\r\n*
+  Attach/Detach application servers to a HAProxy load balancer.\r\n* Basic set of
+  recipes for a RightLink-based server with logging, monitoring, alerts, tagging,
+  etc.\r\n* MultiCloud Images that reference the latest supported images with a frozen
+  and tested software repository date.\r\n* Basic set of alerts for most server type
+  monitoring.\r\n* Examples of system-required input variables.\r\n\r\n\r\n* * *\r\n\r\n__Tested
+  Linux distros:__\r\n\r\n* Ubuntu 14.04 x86_64\r\n\r\n\r\n__Tested compute clouds:__\r\n\r\n*
+  AWS"
+Inputs:
+  APPLICATION_NAME: blank
+  APPLICATION_ROOT_PATH: blank
+  BIND_NETWORK_INTERFACE: blank
+  CHEF_SERVER_SSL_CERT: blank
+  CHEF_SERVER_URL: blank
+  CHEF_VALIDATION_KEY: blank
+  CHEF_VALIDATION_NAME: blank
+  COLLECTD_SERVER: env:RS_TSS
+  LISTEN_PORT: blank
+  PACKAGES: blank
+  REFRESH_TOKEN: blank
+  RS_INSTANCE_UUID: env:RS_INSTANCE_UUID
+  SCM_DEPLOY_KEY: blank
+  TOMCAT_APPLICATION_NAME: blank
+  TOMCAT_DATABASE_HOST: blank
+  TOMCAT_DATABASE_PASSWORD: blank
+  TOMCAT_DATABASE_SCHEMA: blank
+  TOMCAT_DATABASE_USER: blank
+  TOMCAT_VHOST_PATH: blank
+  TOMCAT_WAR_PATH: blank
+  VERSION: blank
+  VHOST_PATH: blank
+RightScripts:
+  Boot:
+  - RL10_Linux_Wait_For_EIP
+  - RL10_Linux_Setup_Hostname
+  - RL10_Linux_Upgrade
+  - RL10_Linux_Setup_Automatic_Upgrade
+  - RL10_Linux_Collectd
+  - Chef_Client_Install
+  - Tomcat_Appserver_Install-chef
+  - Tomcat_Appserver_Application_Backend-chef
+  Decommission:
+  - RL10_Linux_Shutdown_Reason
+  - Tomcat_Appserver_Application_Backend_Detach-chef
+  - Chef_Client_Delete_Node
+  Operational:
+  - RL10_Linux_Setup_Automatic_Upgrade
+  - Tomcat_Appserver_Application_Backend-chef
+  - Tomcat_Appserver_Application_Backend_Detach-chef
+  - RL10_Linux_Upgrade
+MultiCloudImages:
+- Name: RHEL_7.1_x64
+  Revision: 13
+- Name: Debian_7.8_x64
+  Revision: 13
+- Name: RHEL_6.6_x64
+  Revision: 12
+- Name: CentOS_7.1_x64
+  Revision: 15
+- Name: Ubuntu_14.04_x64
+  Revision: 28
+- Name: Ubuntu_12.04_x64
+  Revision: 27
+- Name: CentOS_6.7_x64_KVM
+  Revision: 14
+- Name: CentOS_7.2_x64_KVM
+  Revision: 13
+- Name: Ubuntu_12.04_x64_KVM
+  Revision: 15
+- Name: Ubuntu_14.04_x64_KVM
+  Revision: 15
+Alerts:
+- Name: instance terminated
+  Description: Raises alert if instance terminates abnormally, i.e., not through the
+    RightScale interface or by an elasticity daemon (only for server arrays).
+  Clause: If RS/server.state == terminated for 1 minutes Then escalate critical
+- Name: instance stranded
+  Description: Raises alert if instance enters the stranded state.
+  Clause: If RS/server-failure.state == stranded for 1 minutes Then escalate warning
