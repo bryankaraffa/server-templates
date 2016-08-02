@@ -42,42 +42,107 @@ Inputs:
   VHOST_PATH: blank
 RightScripts:
   Boot:
-  - RL10_Linux_Wait_For_EIP
-  - RL10_Linux_Setup_Hostname
-  - RL10_Linux_Upgrade
-  - RL10_Linux_Setup_Automatic_Upgrade
-  - RL10_Linux_Collectd
-  - Chef_Client_Install
-  - HAProxy_Install-chef
-  - HAProxy_Frontend-chef
-  - HAProxy_Schedule-chef
+  - RL10_Linux_Wait_For_EIP.sh
+  - RL10_Linux_Setup_Hostname.sh
+  - RL10_Linux_Upgrade.sh
+  - RL10_Linux_Setup_Automatic_Upgrade.sh
+  - RL10_Linux_Collectd.sh
+  - Chef_Client_Install.sh
+  - HAProxy_Install-chef.sh
+  - HAProxy_Frontend-chef.sh
+  - HAProxy_Schedule-chef.sh
   Decommission:
-  - RL10_Linux_Shutdown_Reason
-  - Chef_Client_Delete_Node
+  - RL10_Linux_Shutdown_Reason.sh
+  - Chef_Client_Delete_Node.sh
   Operational:
-  - HAProxy_Frontend-chef
-  - HAProxy_Schedule-chef
-  - RL10_Linux_Setup_Automatic_Upgrade
-  - RL10_Linux_Upgrade
+  - HAProxy_Frontend-chef.sh
+  - HAProxy_Schedule-chef.sh
+  - RL10_Linux_Setup_Automatic_Upgrade.sh
+  - RL10_Linux_Upgrade.sh
 MultiCloudImages:
 - Name: RHEL_7.1_x64
+  Description: Red Hat Enterprise Linux (RHEL) 7.1 64-bit architecture (x64) and has
+    tags to enable RightLink 10.x at boot.
   Revision: 13
+  Publisher: RightScale
 - Name: Debian_7.8_x64
+  Description: Debian 7.8 64-bit architecture (x64) and has tags to enable RightLink
+    10.x at boot.
   Revision: 13
+  Publisher: RightScale
 - Name: RHEL_6.6_x64
+  Description: Red Hat Enterprise Linux (RHEL) 6.6 64-bit architecture (x64) and has
+    tags to enable RightLink 10.x at boot.
   Revision: 12
+  Publisher: RightScale
 - Name: CentOS_7.1_x64
+  Description: CentOS 7.1 64-bit architecture (x64) and has tags to install RightLink
+    10.x at boot.
   Revision: 15
+  Publisher: RightScale
 - Name: Ubuntu_14.04_x64
+  Description: Ubuntu 14.04 64-bit architecture (x64) and has tags to install RightLink
+    10.x at boot.
   Revision: 28
+  Publisher: RightScale
 - Name: Ubuntu_12.04_x64
+  Description: Ubuntu 12.04 64-bit architecture (x64) and has tags to install RightLink
+    10.x at boot.
   Revision: 27
+  Publisher: RightScale
 - Name: CentOS_6.7_x64_KVM
+  Description: "CentOS 6.7 64-bit architecture (x64) for the KVM hypervisor and has
+    tags to install RightLink 10.x at boot.\r\n\r\n\r\n\r\nYou can download the image
+    used on this MCI here:\r\n\r\n[OpenStack](http://cloud.centos.org/centos/6/images/CentOS-6-x86_64-GenericCloud-1601.qcow2)"
   Revision: 14
+  Publisher: RightScale
 - Name: CentOS_7.2_x64_KVM
+  Description: "CentOS 7.2 64-bit architecture (x64) for the KVM hypervisor and has
+    tags to install RightLink 10.x at boot.\r\n\r\n\r\nYou can download the image
+    used on this MCI here:\r\n\r\n[OpenStack](http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1601.qcow2)"
   Revision: 13
+  Publisher: RightScale
 - Name: Ubuntu_12.04_x64_KVM
+  Description: "Ubuntu 12.04 64-bit architecture (x64) for the KVM hypervisor and
+    has tags to install RightLink 10.x at boot.\r\n\r\n\r\nYou can download the image
+    used on this MCI here:\r\n\r\n[OpenStack](https://cloud-images.ubuntu.com/releases/12.04.4/release-20160201/ubuntu-12.04-server-cloudimg-amd64-disk1.img)"
   Revision: 15
+  Publisher: RightScale
 - Name: Ubuntu_14.04_x64_KVM
+  Description: "Ubuntu 14.04 64-bit architecture (x64) for the KVM hypervisor and
+    has tags to install RightLink 10.x at boot.\r\n\r\n\r\nYou can download the image
+    used on this MCI here:\r\n\r\n[OpenStack](https://cloud-images.ubuntu.com/releases/14.04.3/release-20160201/ubuntu-14.04-server-cloudimg-amd64-disk1.img)"
   Revision: 15
-Alerts: []
+  Publisher: RightScale
+Alerts:
+- Name: instance terminated
+  Description: Raises alert if instance terminates abnormally, i.e., not through the
+    RightScale interface or by an elasticity daemon (only for server arrays).
+  Clause: If RS/server.state == terminated for 1 minutes Then escalate critical
+- Name: instance stranded
+  Description: Raises alert if instance enters the stranded state.
+  Clause: If RS/server-failure.state == stranded for 1 minutes Then escalate warning
+- Name: instance not responding
+  Description: Raises alert if instance fails to send monitoring information within
+    a given duration, based on the conditions set for this alert.
+  Clause: If cpu-0/cpu-idle.value == NaN for 30 minutes Then escalate warning
+- Name: cpu busy
+  Description: Raises alert if average idle time is too low, based on the conditions
+    set for this alert.
+  Clause: If cpu-0/cpu-idle.value < 15 for 60 minutes Then escalate warning
+- Name: cpu overloaded
+  Description: Raises alert if average idle time is too low, based on the conditions
+    set for this alert.
+  Clause: If cpu-0/cpu-idle.value < 3 for 30 minutes Then escalate critical
+- Name: cpu I/O wait
+  Description: Raises alert if average disk I/O is too high, based on the conditions
+    set for this alert.
+  Clause: If cpu-0/cpu-wait.value > 40 for 30 minutes Then escalate warning
+- Name: high network rx activity
+  Clause: If interface-eth0/if_octets.rx > 50000000 for 30 minutes Then escalate critical
+- Name: 'high network tx activity '
+  Clause: If interface-eth0/if_octets.tx > 50000000 for 30 minutes Then escalate critical
+- Name: low space in root partition
+  Description: Escalates to Critical Alert if space drops below 1G
+  Clause: If df-root/df_complex-free.value < 1000000000 for 5 minutes Then escalate
+    critical
