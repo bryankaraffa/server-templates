@@ -1,6 +1,13 @@
-Name: Image Bundler
-Description: This ServerTemplate uses Packer to copy cloud images, and if needed add
-  RightLink 10 to the Image.
+Name: Image Bundler For RightLink 10
+Description: >
+  This ServerTemplate uses Packer to create cloud images, and if needed add
+  RightLink 10 to the target image.
+
+  # Documentation
+
+  * [Overview](https://docs.rightscale.com/st/rl10/image-bundler/)
+  * [Tutorial](http://docs.rightscale.com/st/rl10/image-bundler/tutorial.html)
+
 Inputs:
   MANAGED_LOGIN: "text:enable"
 RightScripts:
