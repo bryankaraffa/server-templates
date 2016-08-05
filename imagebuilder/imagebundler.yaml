@@ -20,5 +20,5 @@ RightScripts:
   - azure_copy_blob.sh
 MultiCloudImages:
 - Name: Ubuntu_14.04_x64
-  Revision: 45
+  Revision: 49
 Alerts: []
