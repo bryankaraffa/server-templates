@@ -134,6 +134,9 @@ cat <<EOF> $chef_dir/chef.json
     "instance_uuid":"$instance_uuid",
     "instance_id":"$instance_id"
   },
+  "build_essential": {
+    "compiletime": "true"
+  },
   "build-essential": {
     "compile_time": "true"
   },
