@@ -1,0 +1,79 @@
+Name: Chef Server for Linux (RightLink 10)
+Description: |
+  Chef Server for Linux (RightLink 10) ServerTemplate will install and configure a standalone Chef Server. RightLink10 is a new agent to connect servers to the RightScale platform that is very lightweight and simple to install.
+  _It is not a plug-in upgrade from the older RightLink v6 series._
+  See [http://docs.rightscale.com/rl/about.html](http://docs.rightscale.com/rl/about.html) for details.
+
+  This Chef Server ST runs a script to update the packaging system and enable automatic security updates, and a collectd install script to enable RightScale monitoring.See [http://docs.rightscale.com/rl/about.html](http://docs.rightscale.com/rl/about.html) for details.
+
+  This ServerTemplate can run on most any Linux distro that supports cloud-init. It is recommended to use the standard distro images in various clouds.
+
+  __Features__
+
+  * Installs and configures a chef server
+  * Configures Postfix with a mail relayhost
+  * Provides backup and restore
+  * Can schedule backups to occur on regular interval
+
+  __Tested Linux distros:__
+
+  * Ubuntu 14.04 x86_64
+
+  __Tested compute clouds:__
+
+  * AWS
+
+  __Documentation__
+
+  * [Overview](http://docs.rightscale.com/st/rl10/chef-server/overview.html)
+  * [Tutorial](http://docs.rightscale.com/st/rl10/chef-server/tutorial.html)
+Inputs:
+  COLLECTD_SERVER: env:RS_TSS
+  RS_INSTANCE_UUID: env:RS_INSTANCE_UUID
+RightScripts:
+  Boot:
+  - RL10_Linux_Wait_For_EIP.sh
+  - RL10_Linux_Setup_Hostname.sh
+  - RL10_Linux_Upgrade.sh
+  - RL10_Linux_Enable_Monitoring.sh
+  - RL10_Chef_Server_Install.sh
+  Decommission:
+  - RL10_Linux_Shutdown_Reason.sh
+  Operational:
+  - RL10_Chef_Server_Backup.sh
+  - RL10_Chef_Server_Restore.sh
+  - RL10_Chef_Server_Schedule_Backup.sh
+  - RL10_Linux_Setup_Automatic_Upgrade.sh
+  - RL10_Linux_Upgrade.sh
+MultiCloudImages:
+- Name: Ubuntu_14.04_x64
+  Revision: 36
+  Publisher: RightScale
+- Name: RHEL_7.1_x64
+  Revision: 13
+  Publisher: RightScale
+- Name: Debian_7.8_x64
+  Revision: 13
+  Publisher: RightScale
+- Name: RHEL_6.6_x64
+  Revision: 12
+  Publisher: RightScale
+- Name: CentOS_7.1_x64
+  Revision: 20
+  Publisher: RightScale
+- Name: Ubuntu_12.04_x64
+  Revision: 36
+  Publisher: RightScale
+- Name: CentOS_6.7_x64_KVM
+  Revision: 18
+  Publisher: RightScale
+- Name: CentOS_7.2_x64_KVM
+  Revision: 17
+  Publisher: RightScale
+- Name: Ubuntu_12.04_x64_KVM
+  Revision: 19
+  Publisher: RightScale
+- Name: Ubuntu_14.04_x64_KVM
+  Revision: 19
+  Publisher: RightScale
+Alerts: []
