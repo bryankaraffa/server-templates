@@ -15,8 +15,7 @@
 #     Possible Values:
 #       - text:ec2
 #       - text:google
-#       - text:azure
-#       - text:softlayer
+#       - text:openstack
 # ...
 
 PACKER_DIR=/tmp/packer

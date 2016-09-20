@@ -11,6 +11,7 @@
 #   - cloudinit.sh
 #   - ec2.json
 #   - google.json
+#   - openstack.json
 #   - rightlink.ps1
 #   - rightlink.sh
 #   - rs-cloudinit.sh
@@ -28,6 +29,7 @@
 #     Possible Values:
 #       - text:ec2
 #       - text:google
+#       - text:openstack
 #   DATACENTER:
 #     Input Type: single
 #     Category: Cloud
@@ -148,7 +150,63 @@
 #     Input Type: single
 #     Category: Misc
 #     Description: |
-#      Enter  a password on the image
+#      Enter the Windows Administrator password to add to the Image.
+#     Required: false
+#     Advanced: true
+#   OPENSTACK_USERNAME:
+#     Input Type: single
+#     Category: Openstack
+#     Description: |
+#      Enter the openstack username (required)
+#     Required: false
+#     Advanced: true
+#   OPENSTACK_PASSWORD:
+#     Input Type: single
+#     Category: Openstack
+#     Description: |
+#      Enter the openstack password (required)
+#     Required: false
+#     Advanced: true
+#   OPENSTACK_API_KEY:
+#     Input Type: single
+#     Category: Openstack
+#     Description: |
+#      The API key used to access OpenStack. Some OpenStack installations require this. (optional)
+#     Required: false
+#     Advanced: true
+#   OPENSTACK_DOMAIN_NAME:
+#     Input Type: single
+#     Category: Openstack
+#     Description: |
+#      The Domain name you are authenticating with. OpenStack installations require this if identity v3 is used
+#     Required: false
+#     Advanced: true
+#   OPENSTACK_ENDPOINT_TYPE:
+#     Input Type: single
+#     Category: Openstack
+#     Description: |
+#      The endpoint type to use. Can be any of "internal", "internalURL", "admin", "adminURL", "public", and "publicURL". By default this is "public".
+#     Required: false
+#     Advanced: true
+#   OPENSTACK_REGION:
+#     Input Type: single
+#     Category: Openstack
+#     Description: |
+#      The name of the region, such as "DFW", in which to launch the server to create the image.  This is only used for Rackspace openstack cloud.
+#     Required: false
+#     Advanced: true
+#   OPENSTACK_PROJECT_ID:
+#     Input Type: single
+#     Category: Openstack
+#     Description: |
+#      The Project ID to boot the instance into. Some OpenStack installations require this.
+#     Required: false
+#     Advanced: true
+#   OPENSTACK_IDENTITY_ENDPOINT:
+#     Input Type: single
+#     Category: Openstack
+#     Description: |
+#      The URL to the OpenStack Identity service.
 #     Required: false
 #     Advanced: true
 # ...
@@ -165,6 +223,7 @@ sed -i "s#%%DATACENTER%%#$DATACENTER#g" ${PACKER_CONF}
 sed -i "s#%%INSTANCE_TYPE%%#$INSTANCE_TYPE#g" ${PACKER_CONF}
 sed -i "s#%%SSH_USERNAME%%#$SSH_USERNAME#g" ${PACKER_CONF}
 sed -i "s#%%IMAGE_NAME%%#$IMAGE_NAME#g" ${PACKER_CONF}
+sed -i "s#%%SOURCE_IMAGE%%#$SOURCE_IMAGE#g" ${PACKER_CONF}
 sed -i "s#%%RIGHTLINK_VERSION%%#$RIGHTLINK_VERSION#g" rightlink.*
 
 # Copy config files
@@ -189,7 +248,6 @@ case "$CLOUD" in
     provisioner='"type": "shell", "scripts": [ "cloudinit.sh", "rightlink.sh", "azure.sh", "cleanup.sh" ]'
   fi
   sed -i "s#%%OS_TYPE%%#$os_type#g" ${PACKER_CONF}
-  sed -i "s#%%ACCOUNT_FILE%%#$account_file#g" ${PACKER_CONF}
   sed -i "s#%%PROVISIONER%%#$provisioner#g" ${PACKER_CONF}
   sed -i "s#%%STORAGE_ACCOUNT%%#$AZURE_STORAGE_ACCOUNT#g" ${PACKER_CONF}
   sed -i "s#%%CLIENT_ID%%#$CLIENT_ID#g" ${PACKER_CONF}
@@ -202,7 +260,7 @@ case "$CLOUD" in
   sed -i "s#%%IMAGE_PREFIX%%#$IMAGE_PREFIX#g" ${PACKER_CONF}
   sed -i "s#%%SSH_USERNAME%%#$SSH_USERNAME#g" ${PACKER_CONF}
   sed -i "s#%%SSH_PASSWORD%%#$SSH_PASSWORD#g" ${PACKER_CONF}
-  
+
   # Azure plugin requires this directory
   home=${HOME}
   user=${USER}
@@ -265,6 +323,26 @@ case "$CLOUD" in
 
   SOURCE_IMAGE=`echo $SOURCE_IMAGE | rev | cut -d'/' -f1 | rev`
   ;;
+  "openstack")
+  shopt -s nocasematch
+  if [[ $PLATFORM == "Windows" ]]; then
+    communicator="winrm"
+    provisioner='"type": "powershell", "scripts": ["rightlink.ps1"]'
+    userdatafile='"user_data_file": "setup_winrm.txt",'
+    sed -i "/\"ssh_pty\": true,/a $userdatafile" ${PACKER_CONF}
+  else
+    communicator="ssh"
+    provisioner='"type": "shell", "scripts": [ "cloudinit.sh", "rightlink.sh", "cleanup.sh" ]'
+  fi
+  sed -i "s#%%COMMUNICATOR%%#$communicator#g" ${PACKER_CONF}
+  sed -i "s#%%PROVISIONER%%#$provisioner#g" ${PACKER_CONF}
+  sed -i "s#%%USERNAME%%#$OPENSTACK_USERNAME#g" ${PACKER_CONF}
+  sed -i "s#%%PASSWORD%%#$OPENSTACK_PASSWORD#g" ${PACKER_CONF}
+  sed -i "s#%%API_KEY%%#$OPENSTACK_API_KEY#g" ${PACKER_CONF}
+  sed -i "s#%%DOMAIN_NAME%%#$OPENSTACK_DOMAIN_NAME#g" ${PACKER_CONF}
+  sed -i "s#%%REGION%%#$OPENSTACK_REGION#g" ${PACKER_CONF}
+  sed -i "s#%%TENANT_ID%%#$OPENSTACK_PROJECT_ID#g" ${PACKER_CONF}
+  sed -i "s#%%IDENTITY_ENDPOINT%%#$OPENSTACK_IDENTITY_ENDPOINT#g" ${PACKER_CONF}
+  sed -i "s#%%ENDPOINT_TYPE%%#$OPENSTACK_ENDPOINT_TYPE#g" ${PACKER_CONF}
+  sed -i "s#%%IMAGE_PASSWORD%%#$IMAGE_PASSWORD#g" ${PACKER_CONF}
 esac
-
-sed -i "s#%%SOURCE_IMAGE%%#$SOURCE_IMAGE#g" ${PACKER_CONF}

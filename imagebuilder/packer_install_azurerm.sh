@@ -4,6 +4,7 @@
 # RightScript Name: Packer Install tools for ARM
 # Description: |
 #   Install the tools for Packer and ARM
+# Inputs: 
 #   CLOUD:
 #     Input Type: single
 #     Category: Cloud
